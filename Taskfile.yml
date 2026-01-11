@@ -1,0 +1,82 @@
+version: "3"
+
+tasks:
+  install:
+    run: once
+    cmds:
+      - uv sync
+
+  install:frozen:
+    cmds:
+      - uv sync --frozen
+
+  fmt:
+    deps: [install]
+    cmds:
+      - uv run ruff format
+
+  fmt:check:
+    deps: [install]
+    cmds:
+      - uv run ruff format --check
+
+  lint:
+    deps: [install]
+    cmds:
+      - uv run ruff check
+
+  lint:fix:
+    deps: [install]
+    cmds:
+      - uv run ruff check --fix
+
+  test:
+    deps: [install]
+    cmds:
+      - uv run pytest
+
+  typeserver:
+    deps: [install]
+    cmds:
+      - uv run ty server
+
+  typecheck:
+    deps: [install]
+    cmds:
+      - uv run ty check
+
+  dev:
+    desc: "Format, lint, and test (local developer workflow)."
+    deps: [fmt, lint, test]
+
+  ci:
+    desc: "CI checks (no formatting writes)."
+    deps: [fmt:check, lint, test]
+
+  clean:
+    cmds:
+      - rm -rf .pytest_cache .ruff_cache
+      - find . -type d -name "__pycache__" -prune -exec rm -rf {} +
+
+  # --------------------------------------------
+  # ADD docker-compose.yml IF DOCKER IS REQUIRED
+  # --------------------------------------------
+  # docker:down:
+  #   cmds:
+  #     - docker compose down --remove-orphans
+
+  # docker:down:v:
+  #   cmds:
+  #     - docker compose down -v --remove-orphans
+
+  # docker:build:
+  #   cmds:
+  #     - docker compose build
+
+  # docker:up:
+  #   cmds:
+  #     - docker compose up
+
+  # docker:up:build:
+  #   cmds:
+  #     - docker compose up --build
