@@ -58,6 +58,14 @@ tasks:
       - rm -rf .pytest_cache .ruff_cache
       - find . -type d -name "__pycache__" -prune -exec rm -rf {} +
 
+  version:
+    cmds:
+      - uv run cz version -p
+
+  version:bump:
+    cmds:
+      - uv run cz bump
+
   # --------------------------------------------
   # ADD docker-compose.yml IF DOCKER IS REQUIRED
   # --------------------------------------------

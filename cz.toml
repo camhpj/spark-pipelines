@@ -4,4 +4,5 @@ version = "0.0.0"
 tag_format = "v$version"
 version_scheme = "semver2"
 update_changelog_on_bump = true
+major_version_zero = true
 version_files = ["pyproject.toml", "uv.lock"]
