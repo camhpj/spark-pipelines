@@ -238,6 +238,25 @@ task --list
 
 ---
 
+## Versioning w/ Commitizen
+This project is versioned using commitizen with conventional commits.
+
+Basic usage:
+```bash
+# get current project version
+task version  
+
+# commit changes w/ conventional commit
+git add -A
+git commit -m "feat: cool new feature"
+
+# bump project version
+task version:bump
+
+# push w/ tags
+git push origin HEAD --follow-tags
+```
+
 ## Docker Workflow (if applicable)
 
 ```bash
