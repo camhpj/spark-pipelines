@@ -2138,7 +2138,7 @@ wheels = [
 
 [[package]]
 name = "spark-preprocessor"
-version = "0.2.0"
+version = "0.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "sqlglot" },

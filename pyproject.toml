@@ -1,11 +1,9 @@
 [project]
 name = "spark-preprocessor"
-version = "0.2.0"
+version = "0.0.0"
 description = "Add your description here"
 readme = "README.md"
-authors = [
-    { name = "camhpj", email = "camhpjohnson@gmail.com" }
-]
+authors = [{ name = "camhpj", email = "camhpjohnson@gmail.com" }]
 requires-python = ">=3.13"
 dependencies = [
     "sqlglot>=28.5.0",
