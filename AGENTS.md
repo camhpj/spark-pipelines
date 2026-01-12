@@ -196,6 +196,7 @@ When uncertain, default to the most conservative, explicit approach and back it 
   * Non-trivial internal functions where types clarify intent
 * Avoid `Any` except at **explicit boundaries** (e.g., raw external payloads).
   Validate and normalize immediately.
+* NEVER use `from __future__ import annotations`
 
 ---
 

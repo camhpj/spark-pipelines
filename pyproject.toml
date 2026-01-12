@@ -1,12 +1,15 @@
 [project]
 name = "spark-preprocessor"
-version = "0.0.0"
+version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "camhpj", email = "camhpjohnson@gmail.com" }]
 requires-python = ">=3.13"
 dependencies = [
-    "sqlglot>=28.5.0",
+    "pydantic>=2.12.5",
+    "pyyaml>=6.0.3",
+    "sqlglot>=27.28.0,<27.29.dev0",
+    "sqlmesh==0.228.1",
     "structlog>=25.5.0",
     "ydata-profiling>=4.18.0",
 ]
@@ -28,3 +31,7 @@ dev = [
     "ruff>=0.14.11",
     "ty>=0.0.11",
 ]
+
+[tool.ruff]
+target-version = "py313"
+exclude = ["tests"]

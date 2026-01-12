@@ -13,6 +13,7 @@
 - FeatureAssets: bundle of models, join specs, select expressions, and tests produced by Feature.build().
 - Compile: deterministic generation of SQLMesh project, rendered SQL, profiling notebook, and compile report from pipeline YAML.
 - Profiling notebook: Databricks .py notebook using ydata-profiling PySpark integration.
+- Built-in features: age (computed from start/end date columns) and age_bucket (derived from age).
 
 ## Invariants
 - Python >= 3.13.
@@ -21,8 +22,10 @@
 - Ruff is the sole formatter/linter, invoked via Taskfile.
 - Library has no Spark dependency; Spark is used only in generated notebooks and Databricks runtime jobs.
 - Compile is idempotent: the compiler rewrites out_dir deterministically; manual edits are not preserved.
+- Compiler wipes out_dir entirely before writing artifacts.
 - Compiler outputs include a SQLMesh project, rendered SQL, profiling notebook, and compile report in a fixed layout.
 - Semantic models are generated as SQLMesh views from mappings and are the only upstreams referenced by features.
 - Default spine entity is patients; default join key is person_id; default join type is LEFT JOIN.
 - Pipeline output table name is explicit and materialized as a table; output metadata includes pipeline name, version tag, and compile timestamp.
 - Missing required mapping/columns defaults to fail with an optional warn_skip policy.
+- `from __future__ import annotations` must not be used (per AGENTS.md).
