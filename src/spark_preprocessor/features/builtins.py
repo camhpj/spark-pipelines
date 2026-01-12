@@ -1,7 +1,5 @@
 """Built-in features."""
 
-from __future__ import annotations
-
 from spark_preprocessor.features.base import (
     ColumnSpec,
     FeatureAssets,
@@ -22,6 +20,7 @@ class AgeFeature:
         ),
         requirements=(),
         provides=(ColumnSpec(name="age", dtype="int"),),
+        compatible_grains=("PERSON",),
     )
 
     def build(self, ctx, params: dict[str, object]) -> FeatureAssets:
@@ -47,6 +46,7 @@ class AgeBucketFeature:
         params=(),
         requirements=(),
         provides=(ColumnSpec(name="age_bucket", dtype="str"),),
+        compatible_grains=("PERSON",),
     )
 
     def build(self, ctx, params: dict[str, object]) -> FeatureAssets:

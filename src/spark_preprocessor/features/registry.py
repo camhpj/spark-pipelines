@@ -1,7 +1,5 @@
 """Feature registry."""
 
-from __future__ import annotations
-
 from collections.abc import Iterable
 
 from spark_preprocessor.errors import FeatureNotFoundError, ValidationError

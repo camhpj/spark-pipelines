@@ -1,7 +1,5 @@
 """Feature interfaces and data structures."""
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Literal, Protocol, TYPE_CHECKING
 
@@ -38,6 +36,7 @@ class FeatureMetadata:
     params: tuple[FeatureParamSpec, ...]
     requirements: tuple[FeatureRequirement, ...]
     provides: tuple[ColumnSpec, ...]
+    compatible_grains: tuple[str, ...] | None = None
 
 
 @dataclass(frozen=True)

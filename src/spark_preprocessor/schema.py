@@ -1,7 +1,5 @@
 """Pydantic schemas for pipeline and mapping specifications."""
 
-from __future__ import annotations
-
 from pathlib import Path
 from typing import Any, Literal
 
@@ -54,6 +52,32 @@ class MappingSpec(BaseModel):
         if entity in self.references:
             return self.references[entity].columns
         raise ConfigurationError(f"Unknown entity or reference: {entity}")
+
+
+def load_mapping_spec(path: Path) -> MappingSpec:
+    """Load a mapping specification from YAML.
+
+    Args:
+        path: Path to the mapping YAML.
+
+    Returns:
+        Parsed MappingSpec.
+
+    Raises:
+        ConfigurationError: If the file is missing or invalid.
+    """
+
+    if not path.exists():
+        raise ConfigurationError(f"Mapping file not found: {path}")
+    data = yaml.safe_load(path.read_text())
+    if not isinstance(data, dict):
+        raise ConfigurationError("Mapping YAML must be a mapping at the top level")
+    if "mapping" in data:
+        data = data["mapping"]
+    try:
+        return MappingSpec.model_validate(data)
+    except Exception as exc:
+        raise ConfigurationError("Mapping YAML failed validation") from exc
 
 
 class PrefixingConfig(BaseModel):
@@ -132,6 +156,8 @@ class ProfilingConfig(BaseModel):
 
     enabled: bool = False
     sample_rows: int = 100000
+    sampling_mode: Literal["random", "deterministic"] = "random"
+    sampling_seed: int = 42
     profile_raw_entities: list[str] = Field(default_factory=list)
     profile_output: bool = True
     output_dir: str | None = None

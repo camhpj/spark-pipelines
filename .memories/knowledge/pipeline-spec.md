@@ -21,4 +21,4 @@ Verified on 2026-01-12.
 - `features` is a list of `{key, params}`. `params` is a free-form map validated per feature metadata.
 
 ## Profiling
-- `profiling` supports: `enabled`, `sample_rows`, `profile_raw_entities`, `profile_output`, `output_dir`.
+- `profiling` supports: `enabled`, `sample_rows`, `sampling_mode`, `sampling_seed`, `profile_raw_entities`, `profile_output`, `output_dir`.

@@ -1,7 +1,6 @@
 """Pipeline compiler for spark-preprocessor."""
 
-from __future__ import annotations
-
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,7 +21,11 @@ from spark_preprocessor.features.base import (
     JoinModelSpec,
     SqlmeshModelSpec,
 )
-from spark_preprocessor.schema import PipelineDocument, load_pipeline_document
+from spark_preprocessor.schema import (
+    MappingSpec,
+    PipelineDocument,
+    load_pipeline_document,
+)
 from spark_preprocessor.semantic_contract import (
     SemanticContract,
     default_semantic_contract,
@@ -33,6 +36,9 @@ from spark_preprocessor.sqlmesh_project import (
     render_sqlmesh_model,
 )
 from spark_preprocessor.profiling import render_profiling_notebook
+
+
+_CANONICAL_NAME_PATTERN = re.compile(r"^[a-z][a-z0-9_]*$")
 
 
 @dataclass(frozen=True)
@@ -135,6 +141,29 @@ def _validate_pipeline(document: PipelineDocument, contract: SemanticContract) -
             f"Spine key '{pipeline.spine.key}' is not mapped for entity '{pipeline.spine.entity}'"
         )
 
+    spine_missing = [
+        column
+        for column in pipeline.spine.columns
+        if column not in mapping.entity_columns(pipeline.spine.entity)
+    ]
+    if spine_missing:
+        raise ConfigurationError(
+            "Spine columns are missing from mapping: "
+            f"{sorted(spine_missing)} for entity '{pipeline.spine.entity}'"
+        )
+
+    if pipeline.grain != "PERSON":
+        if pipeline.spine.entity == "patients" and pipeline.spine.key == "person_id":
+            raise ConfigurationError(
+                "Non-PERSON grain requires a non-default spine entity/key"
+            )
+
+    invalid_names = _invalid_canonical_names(mapping, contract)
+    if invalid_names:
+        raise ConfigurationError(
+            f"Invalid canonical column names: {sorted(invalid_names)}"
+        )
+
     for entity_name, required in contract.required_columns.items():
         if not mapping.has_entity(entity_name):
             continue
@@ -187,6 +216,25 @@ def _build_semantic_models(
     return models
 
 
+def _invalid_canonical_names(
+    mapping: MappingSpec,
+    contract: SemanticContract,
+) -> set[str]:
+    if "lower_snake_case" not in contract.naming_rules:
+        return set()
+
+    invalid: set[str] = set()
+    for entity_mapping in mapping.entities.values():
+        for column in entity_mapping.columns:
+            if not _CANONICAL_NAME_PATTERN.match(column):
+                invalid.add(column)
+    for reference_mapping in mapping.references.values():
+        for column in reference_mapping.columns:
+            if not _CANONICAL_NAME_PATTERN.match(column):
+                invalid.add(column)
+    return invalid
+
+
 def _render_semantic_sql(table: str, columns: dict[str, str]) -> str:
     select_lines = [
         f"  {physical} AS {canonical}"
@@ -202,15 +250,25 @@ def _build_features(
     skipped: dict[str, str] = {}
     available_columns: set[str] = set()
     known_outputs: set[str] = set()
+    spine_columns = set(document.pipeline.spine.columns)
     validation_policy = document.pipeline.validation.on_missing_required_column
 
-    for feature_cfg in document.features:
-        feature = feature_registry.get_feature(feature_cfg.key)
+    for feature_key in feature_registry.list_features():
+        feature = feature_registry.get_feature(feature_key)
         known_outputs.update({spec.name for spec in feature.meta.provides})
 
     for feature_cfg in document.features:
         feature = feature_registry.get_feature(feature_cfg.key)
         metadata = feature.meta
+
+        if document.pipeline.grain != "PERSON":
+            grains = metadata.compatible_grains
+            if grains is None or document.pipeline.grain not in grains:
+                message = "incompatible with pipeline grain"
+                if validation_policy == "warn_skip":
+                    skipped[metadata.key] = message
+                    continue
+                raise ValidationError(f"Feature '{metadata.key}' is {message}")
 
         params = _validate_params(metadata, feature_cfg.params)
         missing_required = _check_requirements(metadata.requirements, ctx)
@@ -238,7 +296,7 @@ def _build_features(
             )
 
         dependency_miss = _missing_feature_dependencies(
-            select_expressions, available_columns, known_outputs
+            select_expressions, available_columns, known_outputs, spine_columns
         )
         if dependency_miss:
             message = "missing dependent feature outputs"
@@ -345,9 +403,6 @@ def _check_column_refs(
         if value is None:
             continue
         ref = ctx.resolve_column_ref(str(value))
-        if ref.entity != ctx.spine_entity:
-            missing.add(f"{ref.entity}.{ref.column}")
-            continue
         if not ctx.mapping.has_column(ref.entity, ref.column):
             missing.add(f"{ref.entity}.{ref.column}")
     return missing
@@ -379,13 +434,14 @@ def _missing_feature_dependencies(
     expressions: list[SelectExpression],
     available_columns: set[str],
     known_outputs: set[str],
+    spine_columns: set[str],
 ) -> set[str]:
     missing: set[str] = set()
     for expr in expressions:
         referenced = _expression_references(
             expr.expression, known_outputs - {expr.alias}
         )
-        missing.update(referenced - available_columns)
+        missing.update(referenced - available_columns - spine_columns)
     return missing
 
 
@@ -401,12 +457,10 @@ def _build_final_model(
         expr for feature in features for expr in feature.select_expressions
     ]
 
-    rename_map = _build_rename_map(select_expressions, naming)
-    rename_map = _apply_collision_policy(
-        rename_map, select_expressions, naming, document
+    resolved_expressions, rename_map = _resolve_select_expressions(
+        select_expressions, naming, document.pipeline.spine.columns
     )
-
-    updated_expressions = _apply_renames(select_expressions, rename_map)
+    updated_expressions = _apply_reference_renames(resolved_expressions, rename_map)
 
     base_exprs, derived_exprs = _split_derived_expressions(updated_expressions)
 
@@ -449,65 +503,80 @@ def _prepend_metadata(
     return "\n".join(metadata_lines) + "\n" + sql
 
 
-def _build_rename_map(expressions: list[SelectExpression], naming) -> dict[str, str]:
-    rename_map: dict[str, str] = {}
+def _resolve_select_expressions(
+    expressions: list[SelectExpression], naming, spine_columns: list[str]
+) -> tuple[list[SelectExpression], dict[str, str]]:
+    alias_counts = Counter(expr.alias for expr in expressions)
+    aliases = {expr.alias for expr in expressions}
+    referenced: set[str] = set()
+    for expr in expressions:
+        referenced.update(
+            _expression_references(expr.expression, aliases - {expr.alias})
+        )
+    ambiguous = {alias for alias in referenced if alias_counts[alias] > 1}
+    if ambiguous:
+        raise ValidationError(
+            f"Ambiguous references to duplicated feature outputs: {sorted(ambiguous)}"
+        )
+
+    base_aliases: list[str] = []
     for expr in expressions:
         alias = expr.alias
         if naming.prefixing.enabled:
             prefix = _feature_prefix(expr.source_feature, naming)
             alias = f"{prefix}{naming.prefixing.separator}{alias}"
-        rename_map[expr.alias] = alias
-    return rename_map
+        base_aliases.append(alias)
 
-
-def _apply_collision_policy(
-    rename_map: dict[str, str],
-    expressions: list[SelectExpression],
-    naming,
-    document: PipelineDocument,
-) -> dict[str, str]:
-    final_map = dict(rename_map)
-    collisions = _find_collisions(
-        final_map, expressions, document.pipeline.spine.columns
-    )
-    if not collisions:
-        return final_map
-
-    if naming.collision_policy == "fail":
-        raise ValidationError(f"Column name collisions: {sorted(collisions)}")
-
-    for expr in expressions:
-        if final_map[expr.alias] in collisions:
-            prefix = _feature_prefix(expr.source_feature, naming)
-            final_map[expr.alias] = f"{prefix}{naming.prefixing.separator}{expr.alias}"
-
-    collisions = _find_collisions(
-        final_map, expressions, document.pipeline.spine.columns
-    )
+    collisions = _find_collisions_for_aliases(base_aliases, spine_columns)
     if collisions:
-        raise ValidationError(
-            f"Column name collisions after auto-prefix: {sorted(collisions)}"
+        if naming.collision_policy == "fail":
+            raise ValidationError(f"Column name collisions: {sorted(collisions)}")
+
+        resolved_aliases: list[str] = []
+        for expr, alias in zip(expressions, base_aliases, strict=True):
+            if alias in collisions:
+                prefix = _feature_prefix(expr.source_feature, naming)
+                alias = f"{prefix}{naming.prefixing.separator}{expr.alias}"
+            resolved_aliases.append(alias)
+
+        collisions = _find_collisions_for_aliases(resolved_aliases, spine_columns)
+        if collisions:
+            raise ValidationError(
+                f"Column name collisions after auto-prefix: {sorted(collisions)}"
+            )
+    else:
+        resolved_aliases = base_aliases
+
+    rename_map = {
+        expr.alias: resolved_aliases[index]
+        for index, expr in enumerate(expressions)
+        if alias_counts[expr.alias] == 1
+    }
+
+    updated = [
+        SelectExpression(
+            expression=expr.expression,
+            alias=resolved_aliases[index],
+            source_feature=expr.source_feature,
         )
+        for index, expr in enumerate(expressions)
+    ]
+    return updated, rename_map
 
-    return final_map
 
-
-def _find_collisions(
-    rename_map: dict[str, str],
-    expressions: list[SelectExpression],
-    spine_columns: list[str],
+def _find_collisions_for_aliases(
+    aliases: list[str], spine_columns: list[str]
 ) -> set[str]:
     seen = set(spine_columns)
     collisions: set[str] = set()
-    for expr in expressions:
-        alias = rename_map[expr.alias]
+    for alias in aliases:
         if alias in seen:
             collisions.add(alias)
         seen.add(alias)
     return collisions
 
 
-def _apply_renames(
+def _apply_reference_renames(
     expressions: list[SelectExpression], rename_map: dict[str, str]
 ) -> list[SelectExpression]:
     updated: list[SelectExpression] = []
@@ -519,7 +588,7 @@ def _apply_renames(
         updated.append(
             SelectExpression(
                 expression=expr_text,
-                alias=rename_map[expr.alias],
+                alias=expr.alias,
                 source_feature=expr.source_feature,
             )
         )
@@ -590,10 +659,10 @@ def _render_with_base(base_sql: str, outer_selects: list[str]) -> str:
 
 def _feature_prefix(feature_key: str, naming) -> str:
     if naming.prefixing.scheme == "feature":
-        return feature_key
+        return feature_key.replace(".", "_")
     if "." in feature_key:
-        return feature_key.split(".", 1)[0]
-    return feature_key
+        return feature_key.split(".", 1)[0].replace(".", "_")
+    return feature_key.replace(".", "_")
 
 
 def _build_compile_report(

@@ -10,6 +10,10 @@ Verified on 2026-01-12.
 - structlog >=25.5.0
 - ydata-profiling >=4.18.0
 
+## Optional Extras
+- `duckdb`: duckdb >=1.0.0, pyarrow >=15.0.0
+- `databricks`: databricks-sql-connector >=3.0.0, pyspark >=3.5.0
+
 ## Dev
 - commitizen >=4.11.0
 - ipython >=9.9.0

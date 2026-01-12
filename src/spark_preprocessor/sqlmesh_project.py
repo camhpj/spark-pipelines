@@ -1,7 +1,5 @@
 """Helpers for generating SQLMesh project artifacts."""
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -21,12 +19,13 @@ class SqlmeshConfig:
 def render_sqlmesh_model(spec: SqlmeshModelSpec) -> str:
     """Render a SQLMesh model file content."""
 
-    header_items = [f"name {spec.name}", f"kind {spec.kind}"]
+    kind = "FULL" if spec.kind == "TABLE" else spec.kind
+    header_items = [f"name {spec.name}", f"kind {kind}"]
     if spec.tags:
         tags = ", ".join(spec.tags)
         header_items.append(f"tags [{tags}]")
     header_body = ",\n  ".join(header_items)
-    header = f"MODEL (\n  {header_body}\n)"
+    header = f"MODEL (\n  {header_body}\n);"
     return f"{header}\n\n{spec.sql.strip()}\n"
 
 

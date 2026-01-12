@@ -290,6 +290,7 @@ Validate at the boundary (often with Pydantic), then keep internal models simple
 ### General expectations
 
 * Test coverage is important.
+* Tests should be developed alongside features, not as an afterthought.
 * Tests must reflect **real usage**, not implementation details.
 * Focus on plausible, high-risk edge cases.
 * Avoid contrived cases with no realistic failure risk.
