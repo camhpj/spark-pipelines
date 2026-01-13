@@ -20,6 +20,8 @@
 - Repo uses a src layout; package is under src/spark_preprocessor.
 - Use uv for dependency management and Taskfile for common commands.
 - Ruff is the sole formatter/linter, invoked via Taskfile.
+- Tests are organized into two tiers under `tests/unit/` and `tests/integration/`. Updated on 2026-01-13.
+- Pytest is configured in `pyproject.toml` to run with coverage (`pytest-cov`) and fail under 85% total coverage. Updated on 2026-01-13.
 - Library has no Spark dependency; Spark is used only in generated notebooks and Databricks runtime jobs.
 - Compile is idempotent: the compiler rewrites out_dir deterministically; manual edits are not preserved.
 - Compiler wipes out_dir entirely before writing artifacts.

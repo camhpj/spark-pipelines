@@ -13,6 +13,7 @@ Verified on 2026-01-13.
 
 ## Runtime Entry Point
 - `spark_preprocessor.runtime.apply_pipeline:main` loads the pipeline document, initializes a SQLMesh `Context`, plans, and applies the plan.
+- `sqlmesh.core.context.Context` is imported inside `main()` (lazy import) to keep module import lightweight. Updated on 2026-01-13.
 
 Previously:
 > `spark_preprocessor.runtime.apply_pipeline:main` exists but raises a RuntimeError (not yet implemented).

@@ -5,7 +5,6 @@ import logging
 from pathlib import Path
 
 import structlog
-from sqlmesh.core.context import Context
 
 from spark_preprocessor.errors import SparkPreprocessorError
 from spark_preprocessor.schema import load_pipeline_document
@@ -28,6 +27,9 @@ def main(argv: list[str] | None = None) -> None:
 
     log = structlog.get_logger()
     try:
+        # Import at runtime to keep module import light-weight and easier to unit-test.
+        from sqlmesh.core.context import Context
+
         document = load_pipeline_document(args.pipeline)
         context = Context(paths=args.project)
         plan = context.plan(environment=args.environment, no_prompts=True)

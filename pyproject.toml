@@ -41,3 +41,19 @@ dev = [
 [tool.ruff]
 target-version = "py313"
 exclude = ["tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "--cov=spark_preprocessor",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-fail-under=85",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["spark_preprocessor"]
+
+[tool.coverage.report]
+skip_empty = true
+omit = ["tests/*"]
