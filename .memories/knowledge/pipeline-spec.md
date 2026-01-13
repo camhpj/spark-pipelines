@@ -1,6 +1,6 @@
 # Pipeline Specification (Current Implementation)
 
-Verified on 2026-01-12.
+Verified on 2026-01-13.
 
 ## Top-Level YAML
 - Single document with keys: `mapping`, `pipeline`, `features`, and optional `profiling`.
@@ -19,6 +19,7 @@ Verified on 2026-01-12.
 
 ## Features
 - `features` is a list of `{key, params}`. `params` is a free-form map validated per feature metadata.
+- Features are evaluated in list order; features that reference other feature outputs must appear after their dependencies.
 
 ## Profiling
 - `profiling` supports: `enabled`, `sample_rows`, `sampling_mode`, `sampling_seed`, `profile_raw_entities`, `profile_output`, `output_dir`.

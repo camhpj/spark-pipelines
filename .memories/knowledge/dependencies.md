@@ -1,6 +1,6 @@
 # Dependencies
 
-Verified on 2026-01-12.
+Verified on 2026-01-13.
 
 ## Runtime
 - pydantic >=2.12.5
@@ -16,6 +16,8 @@ Verified on 2026-01-12.
 
 ## Dev
 - commitizen >=4.11.0
+- duckdb >=1.0.0
+- faker >=25.0.0
 - ipython >=9.9.0
 - jupyterlab >=4.5.1
 - pytest >=9.0.2
@@ -24,5 +26,5 @@ Verified on 2026-01-12.
 - ty >=0.0.11
 
 ## Decay Notes
-- Possibly Stale: Dependency versions can drift quickly; re-verify against `pyproject.toml` and `uv.lock` before making compatibility decisions. Verified on 2026-01-12.
-- High Risk if Wrong: `sqlmesh` and `sqlglot` pins affect SQL rendering and runtime compatibility; confirm versions are still intended before shipping. Verified on 2026-01-12.
+- Possibly Stale: Dependency versions can drift quickly; re-verify against `pyproject.toml` and `uv.lock` before making compatibility decisions. Verified on 2026-01-13.
+- High Risk if Wrong: `sqlmesh` and `sqlglot` pins affect SQL rendering and runtime compatibility; confirm versions are still intended before shipping. Verified on 2026-01-13.

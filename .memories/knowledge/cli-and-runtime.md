@@ -1,6 +1,6 @@
 # CLI and Runtime
 
-Verified on 2026-01-12.
+Verified on 2026-01-13.
 
 ## CLI Commands
 - `compile --pipeline <path> --out <dir>`: compiles pipeline and writes artifacts.
@@ -18,4 +18,4 @@ Previously:
 > `spark_preprocessor.runtime.apply_pipeline:main` exists but raises a RuntimeError (not yet implemented).
 
 ## Decay Notes
-- Possibly Stale: SQLMesh runtime behavior can change across versions; verify `apply_pipeline.py` against the installed SQLMesh API before deployment. Verified on 2026-01-12.
+- Possibly Stale: SQLMesh runtime behavior can change across versions; verify `apply_pipeline.py` against the installed SQLMesh API before deployment. Verified on 2026-01-13.

@@ -1,6 +1,6 @@
 # Profiling Notebook
 
-Verified on 2026-01-12.
+Verified on 2026-01-13.
 
 ## Generation
 - Notebook is generated only when `profiling.enabled` is true.
@@ -20,4 +20,4 @@ Previously:
 > Each table is loaded via `spark.table(...).limit(sample_rows)`.
 
 ## Decay Notes
-- Possibly Stale: `ydata_profiling` Spark integration and Databricks APIs can change; verify against `profiling.py` when upgrading dependencies. Verified on 2026-01-12.
+- Possibly Stale: `ydata_profiling` Spark integration and Databricks APIs can change; verify against `profiling.py` when upgrading dependencies. Verified on 2026-01-13.

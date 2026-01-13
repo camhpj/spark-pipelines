@@ -1,6 +1,6 @@
 # Features and Registry
 
-Verified on 2026-01-12.
+Verified on 2026-01-13.
 
 ## Registry
 - Global in-memory registry maps feature `key` to feature instances.
@@ -22,3 +22,4 @@ Previously:
 ## Built-in Features
 - `age`: requires params `start` and `end` (column refs), outputs `age` as `INT` using `months_between(end, start) / 12`.
 - `age_bucket`: derives from `age` and outputs `age_bucket` with fixed buckets: `0-17`, `18-34`, `35-49`, `50-64`, `65+`.
+  - `age_bucket` depends on `age` being present earlier in the feature list (otherwise the compiler will fail/skip it for missing dependent outputs).

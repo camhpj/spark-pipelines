@@ -14,6 +14,20 @@ Primary libraries used:
 - **ydata-profiling** for Spark-based profiling in the generated notebook.
 - **structlog** for structured logging.
 
+## Documentation
+
+Hand-written guides live in `docs/`:
+
+- `docs/README.md` (index)
+- `docs/overview.md` (what it does)
+- `docs/architecture.md` (compiler/runtime flow)
+- `docs/pipeline.md` / `docs/mapping.md` / `docs/profiling.md` (YAML reference)
+- `docs/features.md` (feature authoring)
+- `docs/runtime.md` (Databricks execution)
+- `docs/testing.md` (test expectations)
+- `docs/troubleshooting.md` (common errors)
+- `docs/api-reference.md` (curated API)
+
 ## Technical Implementation
 
 High-level flow:
@@ -237,7 +251,13 @@ This ensures `ty` is the sole active language server.
 
 ## Notes & Conventions
 
-* Formatting and linting are handled **exclusively by Ruff**
+* Python >= 3.13 and a `src/` layout are required
+* Formatting and linting are handled **exclusively by Ruff** (run via Taskfile)
+* Type checking is handled by **ty** (run via Taskfile)
+* Tests are mandatory; add tests with new features/behavior
+* `from __future__ import annotations` is not allowed
+* Compilation wipes `out_dir` and regenerates all artifacts deterministically
+* The library runs inside Databricks; no external Databricks connections are supported
 * Test configuration (pytest flags, markers, etc.) lives in `pyproject.toml`
 * Dependency changes should be committed via `uv` lock updates
 * Docker volumes are **not** removed by default—use `docker:down:v` explicitly if needed
