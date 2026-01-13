@@ -1,0 +1,47 @@
+mapping:
+  entities:
+    patients:
+      table: "patients_raw"
+      columns:
+        person_id: "person_id"
+        date_of_birth: "date_of_birth"
+        as_of_date: "as_of_date"
+
+pipeline:
+  name: "example_enriched"
+  version: "v0.1.0"
+  grain: "PERSON"
+  spine:
+    entity: "patients"
+    key: "person_id"
+    columns:
+      - "person_id"
+      - "date_of_birth"
+      - "as_of_date"
+  output:
+    table: "semantic.enriched_example"
+    materialization: "table"
+  naming:
+    prefixing:
+      enabled: false
+      scheme: "feature"
+      separator: "__"
+    collision_policy: "fail"
+  validation:
+    on_missing_required_column: "fail"
+
+features:
+  - key: "age"
+    params:
+      start: "date_of_birth"
+      end: "as_of_date"
+  - key: "age_bucket"
+
+profiling:
+  enabled: false
+  sample_rows: 1000
+  sampling_mode: "deterministic"
+  sampling_seed: 42
+  profile_raw_entities: []
+  profile_output: true
+  output_dir: null

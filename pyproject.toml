@@ -29,6 +29,7 @@ build-backend = "uv_build"
 dev = [
     "commitizen>=4.11.0",
     "duckdb>=1.0.0",
+    "faker>=25.0.0",
     "ipython>=9.9.0",
     "jupyterlab>=4.5.1",
     "pytest>=9.0.2",

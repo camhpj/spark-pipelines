@@ -14,3 +14,7 @@ wheels/
 
 # ruff
 .ruff_cache
+
+# example outputs
+example/out/
+example/duckdb.db
