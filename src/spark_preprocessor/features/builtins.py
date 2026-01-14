@@ -5,6 +5,7 @@ from spark_preprocessor.features.base import (
     FeatureAssets,
     FeatureMetadata,
     FeatureParamSpec,
+    BuildContext,
 )
 
 
@@ -23,7 +24,7 @@ class AgeFeature:
         compatible_grains=("PERSON",),
     )
 
-    def build(self, ctx, params: dict[str, object]) -> FeatureAssets:
+    def build(self, ctx: BuildContext, params: dict[str, object]) -> FeatureAssets:
         start = params["start"]
         end = params["end"]
         start_sql = ctx.column_ref_sql(str(start))
@@ -49,7 +50,7 @@ class AgeBucketFeature:
         compatible_grains=("PERSON",),
     )
 
-    def build(self, ctx, params: dict[str, object]) -> FeatureAssets:
+    def build(self, ctx: BuildContext, params: dict[str, object]) -> FeatureAssets:
         expression = (
             "CASE "
             "WHEN age IS NULL THEN NULL "

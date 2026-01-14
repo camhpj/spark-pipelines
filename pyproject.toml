@@ -40,7 +40,7 @@ dev = [
 
 [tool.ruff]
 target-version = "py313"
-exclude = ["tests"]
+exclude = ["tests", "src/spark_preprocessor/features/geisinger/Geisinger Placeholders.ipynb"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
