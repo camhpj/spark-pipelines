@@ -1,12 +1,13 @@
 # Architecture
 
-Verified on 2026-01-12.
+Verified on 2026-01-14.
 
 ## Core Flow
 - `compile_pipeline()` orchestrates parsing, validation, artifact generation, and reporting.
 - The compiler loads a single YAML document into `PipelineDocument` (mapping + pipeline + features + profiling).
 - A default `SemanticContract` supplies required canonical keys per entity.
 - The compiler wipes `out_dir`, recreates the fixed directory layout, then writes models, rendered SQL, compile report, and optional profiling notebook.
+- Model naming differs by execution target: local uses `semantic.*` / `features.*` model names; Databricks mode emits fully-qualified model names into derived per-pipeline schemas (based on output schema + `pipeline.slug`).
 
 ## Determinism and Layout
 - `out_dir` is fully removed and recreated on each compile.

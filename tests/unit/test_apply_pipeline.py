@@ -34,7 +34,9 @@ def test_main_applies_plan(tmp_path: Path) -> None:
         return SimpleNamespace(
             pipeline=SimpleNamespace(
                 name="p",
+                slug="p",
                 version="v",
+                execution_target="local",
                 output=SimpleNamespace(table="t"),
             )
         )
@@ -107,7 +109,9 @@ def test_main_reraises_unexpected_exception(tmp_path: Path) -> None:
         return SimpleNamespace(
             pipeline=SimpleNamespace(
                 name="p",
+                slug="p",
                 version="v",
+                execution_target="local",
                 output=SimpleNamespace(table="t"),
             )
         )

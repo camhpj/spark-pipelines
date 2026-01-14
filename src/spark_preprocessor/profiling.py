@@ -1,9 +1,10 @@
 """Profiling notebook generation."""
 
 from spark_preprocessor.schema import PipelineDocument
+from spark_preprocessor.features.base import BuildContext
 
 
-def render_profiling_notebook(document: PipelineDocument) -> str:
+def render_profiling_notebook(document: PipelineDocument, ctx: BuildContext) -> str:
     """Render a Databricks notebook that profiles selected entities and output."""
 
     profiling = document.profiling
@@ -49,7 +50,7 @@ def render_profiling_notebook(document: PipelineDocument) -> str:
         lines.append("displayHTML(report.to_html())")
 
     for entity in profiling.profile_raw_entities:
-        table_name = f"semantic.{entity}"
+        table_name = ctx.semantic_entity_model_name(entity)
         add_profile_block(table_name, f"{entity} (semantic)")
 
     if profiling.profile_output:
@@ -63,7 +64,7 @@ def render_profiling_notebook(document: PipelineDocument) -> str:
         "    summary.append({'table': table_name, 'rows': df.count(), 'schema': df.schema.simpleString()})"
     )
     for entity in profiling.profile_raw_entities:
-        lines.append(f"add_summary('semantic.{entity}')")
+        lines.append(f"add_summary('{ctx.semantic_entity_model_name(entity)}')")
     if profiling.profile_output:
         lines.append(f"add_summary('{document.pipeline.output.table}')")
     lines.append("summary.append({'run_seconds': time() - run_started_at})")

@@ -20,6 +20,8 @@ Arguments:
 The runtime:
 
 1. Loads the pipeline document (for logging/context).
+   - If `pipeline.execution_target: databricks`, the runtime also ensures the derived
+     internal schemas exist (semantic/features) before applying the project.
 2. Creates a SQLMesh `Context` from the compiled project.
 3. Runs `plan` and `apply` to materialize the output table.
 

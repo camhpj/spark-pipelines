@@ -1,6 +1,6 @@
 # Profiling Notebook
 
-Verified on 2026-01-13.
+Verified on 2026-01-14.
 
 ## Generation
 - Notebook is generated only when `profiling.enabled` is true.
@@ -8,7 +8,9 @@ Verified on 2026-01-13.
 
 ## Notebook Behavior
 - Uses `ProfileReport` from `ydata_profiling`.
-- Profiles `semantic.<entity>` for each entry in `profiling.profile_raw_entities`.
+- Profiles the semantic entity model for each entry in `profiling.profile_raw_entities`.
+  - Local mode: `semantic.<entity>`.
+  - Databricks mode: `<catalog>.<base_schema>__<slug>_semantic.<entity>`.
 - Profiles the output table if `profiling.profile_output` is true.
 - Sampling supports `profiling.sampling_mode` (`random` or `deterministic`) with `profiling.sampling_seed`.
 - Each table is loaded via `spark.table(...)` and ordered with `rand()` (seeded for deterministic) before `limit(sample_rows)`.

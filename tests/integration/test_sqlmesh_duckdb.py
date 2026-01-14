@@ -51,6 +51,7 @@ def test_sqlmesh_duckdb_smoke(tmp_path: Path) -> None:
         },
         "pipeline": {
             "name": "duckdb_enriched",
+            "slug": "duckdb_enriched",
             "version": "v1.0.0",
             "grain": "PERSON",
             "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},

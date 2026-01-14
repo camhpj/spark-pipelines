@@ -6,6 +6,7 @@ Existing knowledge files:
 - architecture.md (compiler flow, artifact generation, metadata handling)
 - build-and-dev.md (uv/Taskfile workflows and standard commands)
 - cli-and-runtime.md (CLI commands and runtime entrypoint status)
+- databricks-namespacing.md (Databricks execution target namespacing rules)
 - documentation.md (hand-written docs location and indexing)
 - dependencies.md (runtime and dev dependency pins/ranges)
 - features-and-registry.md (feature interface, registry, built-ins)

@@ -124,6 +124,7 @@ def test_validate_pipeline_rejects_unknown_spine_entity() -> None:
             "mapping": {"entities": {}},
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "PERSON",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -144,6 +145,7 @@ def test_validate_pipeline_rejects_unmapped_spine_key() -> None:
             },
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "PERSON",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -162,6 +164,7 @@ def test_validate_pipeline_rejects_missing_spine_columns() -> None:
             "mapping": {"entities": {"patients": {"table": "t", "columns": {"person_id": "x"}}}},
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "PERSON",
                 "spine": {
@@ -184,6 +187,7 @@ def test_validate_pipeline_rejects_non_person_default_spine() -> None:
             "mapping": {"entities": {"patients": {"table": "t", "columns": {"person_id": "x"}}}},
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "ENCOUNTER",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -206,6 +210,7 @@ def test_validate_pipeline_rejects_invalid_canonical_names() -> None:
             },
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "PERSON",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -227,6 +232,7 @@ def test_validate_pipeline_rejects_invalid_canonical_names_in_references() -> No
             },
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "PERSON",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -246,6 +252,7 @@ def test_validate_pipeline_rejects_missing_required_columns_for_mapped_entity() 
             "mapping": {"entities": {"patients": {"table": "t", "columns": {"x": "x"}}}},
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "PERSON",
                 "spine": {"entity": "patients", "key": "x", "columns": ["x"]},
@@ -343,6 +350,7 @@ def test_build_features_warn_skip_vs_fail_for_incompatible_grain() -> None:
     )
     ctx = BuildContext(
         pipeline_name="p",
+        pipeline_slug="p",
         spine_entity="patients",
         spine_alias="p",
         mapping=mapping,
@@ -355,6 +363,7 @@ def test_build_features_warn_skip_vs_fail_for_incompatible_grain() -> None:
             "mapping": mapping.model_dump(),
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "ENCOUNTER",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -373,6 +382,7 @@ def test_build_features_warn_skip_vs_fail_for_incompatible_grain() -> None:
             "mapping": mapping.model_dump(),
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "ENCOUNTER",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -406,6 +416,7 @@ def test_build_features_warn_skip_on_missing_columns() -> None:
     )
     ctx = BuildContext(
         pipeline_name="p",
+        pipeline_slug="p",
         spine_entity="patients",
         spine_alias="p",
         mapping=mapping,
@@ -417,6 +428,7 @@ def test_build_features_warn_skip_on_missing_columns() -> None:
             "mapping": mapping.model_dump(),
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "PERSON",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -451,6 +463,7 @@ def test_build_features_fails_on_missing_columns_with_fail_policy() -> None:
     )
     ctx = BuildContext(
         pipeline_name="p",
+        pipeline_slug="p",
         spine_entity="patients",
         spine_alias="p",
         mapping=mapping,
@@ -462,6 +475,7 @@ def test_build_features_fails_on_missing_columns_with_fail_policy() -> None:
             "mapping": mapping.model_dump(),
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "PERSON",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -509,6 +523,7 @@ def test_build_features_warn_skip_on_missing_dependency_due_to_order() -> None:
     )
     ctx = BuildContext(
         pipeline_name="p",
+        pipeline_slug="p",
         spine_entity="patients",
         spine_alias="p",
         mapping=mapping,
@@ -520,6 +535,7 @@ def test_build_features_warn_skip_on_missing_dependency_due_to_order() -> None:
             "mapping": mapping.model_dump(),
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "PERSON",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -568,6 +584,7 @@ def test_build_features_fails_on_missing_dependency_with_fail_policy() -> None:
     )
     ctx = BuildContext(
         pipeline_name="p",
+        pipeline_slug="p",
         spine_entity="patients",
         spine_alias="p",
         mapping=mapping,
@@ -579,6 +596,7 @@ def test_build_features_fails_on_missing_dependency_with_fail_policy() -> None:
             "mapping": mapping.model_dump(),
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "PERSON",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -617,6 +635,7 @@ def test_build_features_rejects_select_alias_mismatch() -> None:
     )
     ctx = BuildContext(
         pipeline_name="p",
+        pipeline_slug="p",
         spine_entity="patients",
         spine_alias="p",
         mapping=mapping,
@@ -628,6 +647,7 @@ def test_build_features_rejects_select_alias_mismatch() -> None:
             "mapping": mapping.model_dump(),
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "PERSON",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -658,6 +678,7 @@ def test_build_semantic_models_includes_reference_models() -> None:
             },
             "pipeline": {
                 "name": "p",
+                "slug": "p",
                 "version": "v",
                 "grain": "PERSON",
                 "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},
@@ -666,7 +687,16 @@ def test_build_semantic_models_includes_reference_models() -> None:
             "features": [],
         }
     )
-    models = _build_semantic_models(doc, contract)
+    ctx = BuildContext(
+        pipeline_name="p",
+        pipeline_slug="p",
+        spine_entity="patients",
+        spine_alias="p",
+        mapping=doc.mapping,
+        semantic_contract=contract,
+        naming=NamingConfig(),
+    )
+    models = _build_semantic_models(doc, ctx)
     names = {m.name for m in models}
     assert "semantic.patients" in names
     assert "semantic.reference__icd10" in names
@@ -730,8 +760,6 @@ def test_write_sqlmesh_project_writes_feature_models_and_tests(tmp_path) -> None
     )
 
     assert (out_dir / "models" / "semantic" / "patients.sql").exists()
-    assert (
-        out_dir / "models" / "features" / "unit.feature_assets" / "feature__some_model.sql"
-    ).exists()
+    assert (out_dir / "models" / "features" / "unit.feature_assets" / "some_model.sql").exists()
     assert (out_dir / "models" / "marts" / "enriched__p.sql").exists()
     assert (out_dir / "tests" / "unit_feature_test.yaml").read_text() == "test: ok\n"

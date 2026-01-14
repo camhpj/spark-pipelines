@@ -7,19 +7,20 @@ Verified on 2026-01-14.
 - Task runner: `Taskfile.yml` with common workflows.
 
 ## Common Tasks
-- `task install` -> `UV_CACHE_DIR=.uv-cache uv sync`
-- `task install:frozen` -> `UV_CACHE_DIR=.uv-cache uv sync --frozen`
+- `task install` -> `uv sync`
+- `task install:frozen` -> `uv sync --frozen`
 - `task fmt` -> `uv run ruff format`
 - `task lint` -> `uv run ruff check`
 - `task test` -> `uv run pytest` (pytest is configured in `pyproject.toml` to run coverage and enforce `--cov-fail-under=85`).
-- `task typecheck` -> `uv run ty check`
+- `task typecheck` -> `uv run ty check` (configured to exclude `tests` and `**/*.ipynb` via `pyproject.toml` and Taskfile CLI args).
 - `task dev` -> `task fmt`, `task lint`, `task test`
-- `task ci` -> `task fmt:check`, `task lint`, `task test`
+- `task ci` -> `task fmt:check`, `task lint`, `task typecheck`, `task test`
 
 Previously:
-> `task install` -> `uv sync`
+> `task install` -> `UV_CACHE_DIR=.uv-cache uv sync`
+> `task install:frozen` -> `UV_CACHE_DIR=.uv-cache uv sync --frozen`
 
-Rationale: `Taskfile.yml` sets a repo-local uv cache (`.uv-cache/`) to avoid permission issues when the default uv cache directory is not accessible. Updated on 2026-01-14.
+Rationale: The Taskfile currently does not set `UV_CACHE_DIR`. If the default uv cache is not accessible in your environment, set `UV_CACHE_DIR` externally (or update the Taskfile) before running `task install`. Updated on 2026-01-14.
 
 ## Archive
 

@@ -7,6 +7,7 @@ from spark_preprocessor.semantic_contract import default_semantic_contract
 def test_age_feature_build_renders_expected_sql() -> None:
     ctx = BuildContext(
         pipeline_name="p",
+        pipeline_slug="p",
         spine_entity="patients",
         spine_alias="p",
         mapping=MappingSpec.model_validate(
@@ -24,6 +25,7 @@ def test_age_feature_build_renders_expected_sql() -> None:
 def test_age_bucket_feature_build_renders_expected_sql() -> None:
     ctx = BuildContext(
         pipeline_name="p",
+        pipeline_slug="p",
         spine_entity="patients",
         spine_alias="p",
         mapping=MappingSpec.model_validate(
@@ -55,4 +57,3 @@ def test_register_builtins_registers_expected_keys() -> None:
 
     register_builtins(register)
     assert set(seen) == {"age", "age_bucket"}
-

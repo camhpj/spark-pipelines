@@ -262,7 +262,9 @@ class FeatureAssets:
 ```yaml
 pipeline:
   name: "client_x_enriched"
+  slug: "client_x_enriched"
   version: "v1.2.3"                 # git tag
+  execution_target: "local"         # local|databricks
   grain: "PERSON"
   spine:
     entity: "patients"
@@ -271,6 +273,9 @@ pipeline:
   output:
     table: "catalog.schema.enriched_client_x"
     materialization: "table"
+  databricks:
+    semantic_schema_suffix: "_semantic"
+    features_schema_suffix: "_features"
   naming:
     prefixing:
       enabled: false

@@ -36,6 +36,10 @@ from spark_preprocessor.sqlmesh_project import (
     render_sqlmesh_model,
 )
 from spark_preprocessor.profiling import render_profiling_notebook
+from spark_preprocessor.model_naming import (
+    databricks_namespaces,
+    parse_three_part_table,
+)
 
 
 _CANONICAL_NAME_PATTERN = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -87,16 +91,28 @@ def compile_pipeline(pipeline_path: str | Path, out_dir: str | Path) -> CompileR
     _wipe_out_dir(out_dir)
     _ensure_layout(out_dir)
 
+    namespaces = None
+    if document.pipeline.execution_target == "databricks":
+        namespaces = databricks_namespaces(
+            output_table=document.pipeline.output.table,
+            pipeline_slug_value=document.pipeline.slug,
+            semantic_schema_suffix=document.pipeline.databricks.semantic_schema_suffix,
+            features_schema_suffix=document.pipeline.databricks.features_schema_suffix,
+        )
+
     ctx = BuildContext(
         pipeline_name=document.pipeline.name,
+        pipeline_slug=document.pipeline.slug,
         spine_entity=document.pipeline.spine.entity,
         spine_alias="p",
         mapping=document.mapping,
         semantic_contract=contract,
         naming=document.pipeline.naming,
+        execution_target=document.pipeline.execution_target,
+        databricks_namespaces=namespaces,
     )
 
-    semantic_models = _build_semantic_models(document, contract)
+    semantic_models = _build_semantic_models(document, ctx)
     built_features, skipped = _build_features(document, ctx)
 
     final_model_spec, rendered_sql = _build_final_model(
@@ -107,7 +123,7 @@ def compile_pipeline(pipeline_path: str | Path, out_dir: str | Path) -> CompileR
 
     profiling_text = None
     if document.profiling and document.profiling.enabled:
-        profiling_text = render_profiling_notebook(document)
+        profiling_text = render_profiling_notebook(document, ctx)
 
     report = _build_compile_report(document, built_features, skipped, compiled_at)
 
@@ -130,6 +146,18 @@ def compile_pipeline(pipeline_path: str | Path, out_dir: str | Path) -> CompileR
 def _validate_pipeline(document: PipelineDocument, contract: SemanticContract) -> None:
     pipeline = document.pipeline
     mapping = document.mapping
+
+    if pipeline.execution_target == "databricks":
+        try:
+            parse_three_part_table(pipeline.output.table)
+            databricks_namespaces(
+                output_table=pipeline.output.table,
+                pipeline_slug_value=pipeline.slug,
+                semantic_schema_suffix=pipeline.databricks.semantic_schema_suffix,
+                features_schema_suffix=pipeline.databricks.features_schema_suffix,
+            )
+        except ValueError as exc:
+            raise ConfigurationError(str(exc)) from exc
 
     if not mapping.has_entity(pipeline.spine.entity):
         raise ConfigurationError(
@@ -194,20 +222,20 @@ def _ensure_layout(out_dir: Path) -> None:
 
 
 def _build_semantic_models(
-    document: PipelineDocument, contract: SemanticContract
+    document: PipelineDocument, ctx: BuildContext
 ) -> list[SqlmeshModelSpec]:
     models: list[SqlmeshModelSpec] = []
     mapping = document.mapping
 
     for entity in sorted(mapping.entities.keys()):
-        model_name = f"semantic.{entity}"
+        model_name = ctx.semantic_entity_model_name(entity)
         sql = _render_semantic_sql(
             mapping.entity_table(entity), mapping.entity_columns(entity)
         )
         models.append(SqlmeshModelSpec(name=model_name, sql=sql, kind="VIEW", tags=[]))
 
     for reference in sorted(mapping.references.keys()):
-        model_name = f"semantic.reference__{reference}"
+        model_name = ctx.semantic_reference_model_name(reference)
         sql = _render_semantic_sql(
             mapping.entity_table(reference), mapping.entity_columns(reference)
         )
@@ -472,7 +500,7 @@ def _build_final_model(
 
     base_sql = _render_select_statement(
         base_selects,
-        f"semantic.{ctx.spine_entity}",
+        ctx.semantic_entity_model_name(ctx.spine_entity),
         ctx.spine_alias,
         join_clauses,
     )
@@ -705,7 +733,7 @@ def _write_sqlmesh_project(
     pipeline_name: str,
 ) -> None:
     for model in semantic_models:
-        path = out_dir / "models" / "semantic" / f"{model.name.split('.', 1)[1]}.sql"
+        path = out_dir / "models" / "semantic" / f"{model.name.split('.')[-1]}.sql"
         path.write_text(render_sqlmesh_model(model))
 
     for feature in features:
@@ -714,7 +742,7 @@ def _write_sqlmesh_project(
         feature_dir = out_dir / "models" / "features" / feature.key
         feature_dir.mkdir(parents=True, exist_ok=True)
         for model in feature.assets.models:
-            filename = f"{model.name.replace('.', '__')}.sql"
+            filename = f"{model.name.split('.')[-1]}.sql"
             (feature_dir / filename).write_text(render_sqlmesh_model(model))
 
     final_path = out_dir / "models" / "marts" / f"enriched__{pipeline_name}.sql"

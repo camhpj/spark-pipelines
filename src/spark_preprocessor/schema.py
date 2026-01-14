@@ -1,12 +1,30 @@
 """Pydantic schemas for pipeline and mapping specifications."""
 
+import re
 from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from spark_preprocessor.errors import ConfigurationError
+
+_PIPELINE_SLUG_PATTERN = re.compile(r"^[a-z0-9_]+$")
+
+
+class DatabricksConfig(BaseModel):
+    """Databricks-specific pipeline options.
+
+    These options are only used when `pipeline.execution_target == "databricks"`.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    semantic_schema_suffix: str = "_semantic"
+    features_schema_suffix: str = "_features"
+
+
+ExecutionTarget = Literal["local", "databricks"]
 
 
 class EntityMapping(BaseModel):
@@ -132,12 +150,22 @@ class PipelineMeta(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str
+    slug: str
     version: str
+    execution_target: ExecutionTarget = "local"
     grain: str = "PERSON"
     spine: SpineConfig
     output: OutputConfig
     naming: NamingConfig = Field(default_factory=NamingConfig)
     validation: ValidationConfig = Field(default_factory=ValidationConfig)
+    databricks: DatabricksConfig = Field(default_factory=DatabricksConfig)
+
+    @field_validator("slug")
+    @classmethod
+    def _validate_slug(cls, value: str) -> str:
+        if not _PIPELINE_SLUG_PATTERN.match(value):
+            raise ValueError(f"must match ^[a-z0-9_]+$: {value!r}")
+        return value
 
 
 class FeatureConfig(BaseModel):

@@ -7,14 +7,14 @@ uses their metadata for validation and output assembly.
 
 The compiler always builds the final enriched model roughly as:
 
-- `FROM semantic.<spine_entity> p`
+- `FROM <semantic spine model> p` (local: `semantic.<spine_entity>`)
 - `SELECT` the spine columns plus each feature's `select_expressions`
 - `JOIN` clauses are concatenated from each feature's `join_models`
 
-Features should treat the `semantic.*` models as their inputs:
+Features should treat the semantic models as their inputs:
 
-- Canonical entities: `semantic.<entity>` (from `mapping.entities`)
-- Canonical references: `semantic.reference__<reference>` (from `mapping.references`)
+- Canonical entities: `ctx.semantic_entity_model_name("<entity>")` (from `mapping.entities`)
+- Canonical references: `ctx.semantic_reference_model_name("<reference>")` (from `mapping.references`)
 
 ## Registry
 
@@ -81,6 +81,10 @@ mapping:
 
 - `ctx.resolve_column_ref("column")` resolves to the spine entity by default.
 - `ctx.column_ref_sql("column")` returns `p.column` **only for the spine entity**.
+- `ctx.semantic_entity_model_name("patients")` returns the SQLMesh model name for a semantic entity.
+- `ctx.semantic_reference_model_name("icd10")` returns the SQLMesh model name for a semantic reference.
+- `ctx.feature_model_name("namespace.feature_key", purpose="...")` returns a feature model name that is
+  valid for the current execution target.
 
 That restriction is intentional: it forces non-spine dependencies to be made explicit through
 `join_models` (and/or feature-defined intermediate models).
@@ -142,12 +146,13 @@ class Forward65FlagFeature:
     def build(self, ctx: BuildContext, params: dict[str, object]) -> FeatureAssets:
         del params
 
-        model_name = "features.geisinger_forward_65_flag__active_pcp"
+        model_name = ctx.feature_model_name(self.meta.key, purpose="active_pcp")
         join_alias = "f65"
 
+        reference_model = ctx.semantic_reference_model_name("physicians_65_forward")
         sql = (
             "SELECT DISTINCT pcp_name "
-            "FROM semantic.reference__physicians_65_forward "
+            f"FROM {reference_model} "
             "WHERE active65f = 1 AND pcp_name IS NOT NULL"
         )
 

@@ -43,7 +43,7 @@ tasks:
   typecheck:
     deps: [install]
     cmds:
-      - uv run ty check --exclude "src/spark_preprocessor/features/geisinger/Geisinger\\ Placeholders.ipynb" --force-exclude
+      - uv run ty check --exclude "**/*.ipynb" --force-exclude
 
   dev:
     desc: "Format, lint, and test (local developer workflow)."

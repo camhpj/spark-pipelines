@@ -41,7 +41,12 @@ mapping:
 
 For each mapping, the compiler generates a SQLMesh semantic view:
 
-- `semantic.<entity>` for entities
-- `semantic.reference__<name>` for references
+- Local mode (`execution_target: local`):
+  - `semantic.<entity>` for entities
+  - `semantic.reference__<name>` for references
+- Databricks mode (`execution_target: databricks`): semantic views are written into a derived
+  schema in the pipeline's catalog:
+  - `<catalog>.<base_schema>__<slug>_semantic.<entity>`
+  - `<catalog>.<base_schema>__<slug>_semantic.reference__<name>`
 
 These semantic views are the only upstreams referenced by features.

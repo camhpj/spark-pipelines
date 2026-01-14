@@ -43,11 +43,12 @@ class Forward65FlagFeature:
     )
 
     def build(self, ctx: BuildContext, params: dict[str, object]) -> FeatureAssets:
-        model_name = f"features.{self.meta.key.replace('.', '__')}__65_forward_pcp"
+        model_name = ctx.feature_model_name(self.meta.key, purpose="65_forward_pcp")
         join_alias = "f65"
-        sql = """
+        reference_model = ctx.semantic_reference_model_name("physicians_65_forward")
+        sql = f"""
             SELECT DISTINCT pcp_name
-            FROM semantic.reference__physicians_65_forward
+            FROM {reference_model}
             WHERE active65f = 1
                 AND pcp_name IS NOT NULL
         """

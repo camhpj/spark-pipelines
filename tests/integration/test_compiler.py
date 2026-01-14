@@ -119,6 +119,7 @@ def _base_payload() -> dict:
         },
         "pipeline": {
             "name": "client_x_enriched",
+            "slug": "client_x_enriched",
             "version": "v1.0.0",
             "grain": "PERSON",
             "spine": {"entity": "patients", "key": "person_id", "columns": ["person_id"]},

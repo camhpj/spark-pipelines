@@ -29,7 +29,9 @@ def scaffold_pipeline(mapping_path: Path, out_dir: Path) -> Path:
         "mapping": mapping.model_dump(),
         "pipeline": {
             "name": "pipeline_name",
+            "slug": "pipeline_slug",
             "version": "v0.1.0",
+            "execution_target": "local",
             "grain": "PERSON",
             "spine": {
                 "entity": spine_entity,

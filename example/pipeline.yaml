@@ -9,7 +9,9 @@ mapping:
 
 pipeline:
   name: "example_enriched"
+  slug: "example_enriched"
   version: "v0.1.0"
+  execution_target: "local"
   grain: "PERSON"
   spine:
     entity: "patients"

@@ -17,7 +17,9 @@ mapping:
 
 pipeline:
   name: "client_x_enriched"
+  slug: "client_x_enriched"
   version: "v1.2.3"
+  execution_target: "local"  # local|databricks
   grain: "PERSON"
   spine:
     entity: "patients"
@@ -28,6 +30,9 @@ pipeline:
   output:
     table: "catalog.schema.enriched_client_x"
     materialization: "table"
+  databricks:
+    semantic_schema_suffix: "_semantic"
+    features_schema_suffix: "_features"
   naming:
     prefixing:
       enabled: false
@@ -57,7 +62,9 @@ profiling:
 ## Pipeline section
 
 - `name`: logical pipeline name (used in artifact names).
+- `slug`: stable identifier used for namespacing internal schemas (Databricks mode).
 - `version`: version tag for traceability (recorded in output metadata).
+- `execution_target`: where the compiled SQLMesh project is intended to run (`local` or `databricks`).
 - `grain`: logical grain (default `PERSON`).
   - If set to non-`PERSON`, the spine entity/key must be non-default and
     every feature must declare compatibility with the grain.
@@ -66,7 +73,11 @@ profiling:
     Features may still reference other mapped spine columns even if they are
     not listed here.
 - `output.table`: explicit output table identifier.
+  - When `execution_target: databricks`, this must be 3-part: `catalog.schema.table`.
 - `output.materialization`: `table` (default) or `view`.
+- `databricks`: schema naming options (only used when `execution_target: databricks`).
+  - Internal schemas are derived from the output schema and pipeline slug:
+    `<base_schema>__<slug>_semantic` and `<base_schema>__<slug>_features`.
 - `naming`: prefixing and collision policy for feature columns.
 - `validation.on_missing_required_column`:
   - `fail`: stop compilation on missing columns.

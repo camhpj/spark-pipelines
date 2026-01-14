@@ -1,6 +1,6 @@
 # Features and Registry
 
-Verified on 2026-01-13.
+Verified on 2026-01-14.
 
 ## Registry
 - Global in-memory registry maps feature `key` to feature instances.
@@ -15,6 +15,7 @@ Verified on 2026-01-13.
 - Supported types: `int`, `float`, `bool`, `str`, `date`, `enum`, `column_ref`.
 - `column_ref` validation checks mapped columns across entities and references.
 - `BuildContext.column_ref_sql()` only supports spine entity references and raises for non-spine refs.
+- `BuildContext` also exposes helpers for generating semantic/reference/feature model names based on the execution target (local vs Databricks).
 
 Previously:
 > `column_ref` currently resolves to the pipeline spine entity only; other entities are rejected in `BuildContext.column_ref_sql()`.
