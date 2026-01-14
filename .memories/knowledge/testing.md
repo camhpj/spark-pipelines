@@ -1,6 +1,6 @@
 # Testing
 
-Verified on 2026-01-13.
+Verified on 2026-01-14.
 
 ## Test Layout
 - Unit tests live in `tests/unit/` and use `test_<module>.py` naming (for example `test_cli.py` for `cli.py`).
@@ -10,7 +10,7 @@ Verified on 2026-01-13.
 ## Tooling
 - Tests run via `task test` which executes `uv run pytest`.
 - Pytest is configured in `pyproject.toml` with `pytest-cov` enabled by default and enforces `--cov-fail-under=85`.
-- Tests use an autouse fixture (`tests/conftest.py`) to snapshot/restore the global feature registry between tests.
+- Tests use an autouse `yield` fixture (`tests/conftest.py`) to snapshot/restore the global feature registry between tests.
 
 Previously:
 > `tests/test_compiler.py` covers:

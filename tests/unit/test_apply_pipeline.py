@@ -52,8 +52,8 @@ def test_main_applies_plan(tmp_path: Path) -> None:
     module_keys = ("sqlmesh", "sqlmesh.core", "sqlmesh.core.context")
     original_modules = {key: sys.modules.get(key) for key in module_keys}
     sys.modules["sqlmesh"] = fake_sqlmesh  # type: ignore[assignment]
-    sys.modules["sqlmesh.core"] = fake_sqlmesh.core  # type: ignore[assignment]
-    sys.modules["sqlmesh.core.context"] = fake_sqlmesh.core.context  # type: ignore[assignment]
+    sys.modules["sqlmesh.core"] = fake_sqlmesh.core
+    sys.modules["sqlmesh.core.context"] = fake_sqlmesh.core.context
 
     try:
         apply_pipeline.main(
@@ -124,8 +124,8 @@ def test_main_reraises_unexpected_exception(tmp_path: Path) -> None:
     module_keys = ("sqlmesh", "sqlmesh.core", "sqlmesh.core.context")
     original_modules = {key: sys.modules.get(key) for key in module_keys}
     sys.modules["sqlmesh"] = fake_sqlmesh  # type: ignore[assignment]
-    sys.modules["sqlmesh.core"] = fake_sqlmesh.core  # type: ignore[assignment]
-    sys.modules["sqlmesh.core.context"] = fake_sqlmesh.core.context  # type: ignore[assignment]
+    sys.modules["sqlmesh.core"] = fake_sqlmesh.core
+    sys.modules["sqlmesh.core.context"] = fake_sqlmesh.core.context
 
     try:
         with pytest.raises(RuntimeError, match="boom"):
